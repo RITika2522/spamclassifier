@@ -30,28 +30,24 @@ public class SpamClassifier {
         }
     }
 
-    // Train Naive Bayes with 10-fold cross-validation
-    public void trainNaiveBayesWithCV() {
+    // Train and evaluate with 10-fold cross-validation
+    public void trainAndEvaluate(Classifier cls, String classifierName) {
         try {
-            classifier = new NaiveBayes();
-            classifier.buildClassifier(dataset);
-
             Evaluation eval = new Evaluation(dataset);
-            eval.crossValidateModel(classifier, dataset, 10, new Random(1));
 
-            System.out.println("\n=== 10-Fold Cross-Validation Results ===");
-            System.out.println("Correct % = " + eval.pctCorrect());
-            System.out.println("Incorrect % = " + eval.pctIncorrect());
-            System.out.println("Precision  = " + eval.precision(1));
-            System.out.println("Recall     = " + eval.recall(1));
-            System.out.println("F1 Score   = " + eval.fMeasure(1));
+            // Perform 10-fold cross-validation
+            eval.crossValidateModel(cls, dataset, 10, new Random(1));
+
+            System.out.println("\n=== Results for " + classifierName + " ===");
             System.out.println(eval.toSummaryString());
+            System.out.println(eval.toClassDetailsString());
+            System.out.println(eval.toMatrixString());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Classifier getClassifier() {
-        return classifier;
+    public Instances getDataset() {
+        return dataset;
     }
 }
