@@ -1,71 +1,57 @@
 package com.javabasic.spamclassifier;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayes;
 import weka.core.Instances;
-import weka.core.converters.CSVLoader;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.Standardize;
+import weka.core.converters.ConverterUtils.DataSource;
 
-import java.io.File;
+import java.util.Random;
 
 public class SpamClassifier {
     private Instances dataset;
+    private Classifier classifier;
 
-    // Load dataset from CSV
-    public void loadDataset(String filepath) {
+    // Load dataset from ARFF
+    public void loadDataset(String filePath) {
         try {
-            CSVLoader loader = new CSVLoader();
-            loader.setSource(new File(filepath));
-            dataset = loader.getDataSet();
+            DataSource source = new DataSource(filePath);
+            dataset = source.getDataSet();
 
-            // Set last attribute as class
-            dataset.setClassIndex(dataset.numAttributes() - 1);
-
-            // Print first 5 rows
-            for (int i = 0; i < 5; i++) {
-                System.out.println(dataset.instance(i));
+            // Set class index to last attribute
+            if (dataset.classIndex() == -1) {
+                dataset.setClassIndex(dataset.numAttributes() - 1);
             }
-            System.out.println("Class attribute: " + dataset.classAttribute().name());
-            System.out.println("Possible classes: " + dataset.classAttribute());
-            System.out.println("Dataset loaded: " + dataset.relationName());
+            System.out.println("Dataset loaded: " + filePath);
             System.out.println("Instances: " + dataset.numInstances());
             System.out.println("Attributes: " + dataset.numAttributes());
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Getter for dataset
-    public Instances getDataset() {
-        return dataset;
-    }
-
-    // 🔹 Apply Normalization
-    public Instances normalizeData(Instances data) {
+    // Train Naive Bayes with 10-fold cross-validation
+    public void trainNaiveBayesWithCV() {
         try {
-            Normalize normalize = new Normalize();
-            normalize.setInputFormat(data);
-            Instances newData = Filter.useFilter(data, normalize);
-            System.out.println("Normalization complete.");
-            return newData;
+            classifier = new NaiveBayes();
+            classifier.buildClassifier(dataset);
+
+            Evaluation eval = new Evaluation(dataset);
+            eval.crossValidateModel(classifier, dataset, 10, new Random(1));
+
+            System.out.println("\n=== 10-Fold Cross-Validation Results ===");
+            System.out.println("Correct % = " + eval.pctCorrect());
+            System.out.println("Incorrect % = " + eval.pctIncorrect());
+            System.out.println("Precision  = " + eval.precision(1));
+            System.out.println("Recall     = " + eval.recall(1));
+            System.out.println("F1 Score   = " + eval.fMeasure(1));
+            System.out.println(eval.toSummaryString());
         } catch (Exception e) {
             e.printStackTrace();
-            return data;
         }
     }
 
-    // 🔹 Apply Standardization
-    public Instances standardizeData(Instances data) {
-        try {
-            Standardize standardize = new Standardize();
-            standardize.setInputFormat(data);
-            Instances newData = Filter.useFilter(data, standardize);
-            System.out.println("Standardization complete.");
-            return newData;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return data;
-        }
+    public Classifier getClassifier() {
+        return classifier;
     }
 }

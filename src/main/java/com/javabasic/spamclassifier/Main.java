@@ -1,20 +1,19 @@
 package com.javabasic.spamclassifier;
-import weka.core.Instances;
 
 public class Main {
     public static void main(String[] args) {
-        // Create classifier object
-        SpamClassifier classifier = new SpamClassifier();
+        try {
+            // Create classifier object
+            SpamClassifier classifier = new SpamClassifier();
 
-        // Load dataset
-        classifier.loadDataset("data/spambase.csv");
+            // Load ARFF dataset
+            classifier.loadDataset("data/spambase.arff");
 
-        // Apply Normalization
-        Instances normalizedData = classifier.normalizeData(classifier.getDataset());
-        System.out.println("Instances after normalization: " + normalizedData.numInstances());
+            // Train and evaluate using 10-fold CV
+            classifier.trainNaiveBayesWithCV();
 
-        // Apply Standardization
-        Instances standardizedData = classifier.standardizeData(classifier.getDataset());
-        System.out.println("Instances after standardization: " + standardizedData.numInstances());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
