@@ -1,4 +1,5 @@
 package com.javabasic.spamclassifier;
+import weka.core.Instances;
 
 public class Main {
     public static void main(String[] args) {
@@ -8,6 +9,12 @@ public class Main {
         // Load dataset
         classifier.loadDataset("data/spambase.csv");
 
-        // Later steps: classifier.trainModel(), classifier.evaluateModel(), etc.
+        // Apply Normalization
+        Instances normalizedData = classifier.normalizeData(classifier.getDataset());
+        System.out.println("Instances after normalization: " + normalizedData.numInstances());
+
+        // Apply Standardization
+        Instances standardizedData = classifier.standardizeData(classifier.getDataset());
+        System.out.println("Instances after standardization: " + standardizedData.numInstances());
     }
 }
